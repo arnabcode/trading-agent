@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "default_max_order_notional": 100000.0,
+  "symbol_whitelist": [
+    "RELIANCE",
+    "TCS",
+    "HDFCBANK",
+    "TEST"
+  ],
+  "symbol_specific_overrides": {
+    "TEST": {
+      "max_order_notional": 50000.0
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "title": "InstrumentId",
+  "type": "object",
+  "properties": {
+    "venue": {
+      "title": "Venue",
+      "default": "NSE",
+      "type": "string"
+    },
+    "symbol": {
+      "title": "Symbol",
+      "type": "string"
+    },
+    "sec_type": {
+      "title": "Sec Type",
+      "default": "EQ",
+      "type": "string"
+    },
+    "expiry": {
+      "title": "Expiry",
+      "type": "string",
+      "format": "date"
+    },
+    "strike": {
+      "title": "Strike",
+      "type": "number"
+    },
+    "right": {
+      "title": "Right",
+      "type": "string"
+    },
+    "currency": {
+      "title": "Currency",
+      "default": "INR",
+      "type": "string"
+    },
+    "lot_size": {
+      "title": "Lot Size",
+      "default": 1,
+      "type": "integer"
+    },
+    "tick_size": {
+      "title": "Tick Size",
+      "default": 0.05,
+      "type": "number"
+    }
+  },
+  "required": [
+    "symbol"
+  ]
+}

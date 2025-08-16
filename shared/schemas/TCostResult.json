@@ -1,0 +1,33 @@
+{
+  "title": "TCostResult",
+  "type": "object",
+  "properties": {
+    "estimated_brokerage": {
+      "title": "Estimated Brokerage",
+      "type": "number"
+    },
+    "estimated_taxes": {
+      "title": "Estimated Taxes",
+      "type": "number"
+    },
+    "estimated_slippage_pct": {
+      "title": "Estimated Slippage Pct",
+      "type": "number"
+    },
+    "total_estimated_cost": {
+      "title": "Total Estimated Cost",
+      "type": "number"
+    },
+    "net_entry_price": {
+      "title": "Net Entry Price",
+      "type": "number"
+    }
+  },
+  "required": [
+    "estimated_brokerage",
+    "estimated_taxes",
+    "estimated_slippage_pct",
+    "total_estimated_cost",
+    "net_entry_price"
+  ]
+}

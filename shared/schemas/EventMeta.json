@@ -1,0 +1,52 @@
+{
+  "title": "EventMeta",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "title": "Event Id",
+      "type": "string",
+      "format": "uuid"
+    },
+    "saga_id": {
+      "title": "Saga Id",
+      "type": "string",
+      "format": "uuid"
+    },
+    "event_type": {
+      "title": "Event Type",
+      "type": "string"
+    },
+    "version": {
+      "title": "Version",
+      "default": 1,
+      "type": "integer"
+    },
+    "created_at": {
+      "title": "Created At",
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "title": "Source",
+      "type": "string"
+    },
+    "dedupe_key": {
+      "title": "Dedupe Key",
+      "type": "string"
+    },
+    "tags": {
+      "title": "Tags",
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "saga_id",
+    "event_type",
+    "source",
+    "dedupe_key"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "title": "RiskResult",
+  "type": "object",
+  "properties": {
+    "is_approved": {
+      "title": "Is Approved",
+      "type": "boolean"
+    },
+    "reason": {
+      "title": "Reason",
+      "type": "string"
+    },
+    "max_position_notional": {
+      "title": "Max Position Notional",
+      "type": "number"
+    },
+    "max_order_notional": {
+      "title": "Max Order Notional",
+      "type": "number"
+    },
+    "stop_loss_price": {
+      "title": "Stop Loss Price",
+      "type": "number"
+    }
+  },
+  "required": [
+    "is_approved",
+    "max_position_notional",
+    "max_order_notional"
+  ]
+}

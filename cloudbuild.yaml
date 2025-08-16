@@ -78,7 +78,7 @@ steps:
       - 'deploy'
       - 'data-ingestion-py'
       - '--gen2'
-      - '--runtime=python39' # Matches the Dockerfile base image
+      - '--runtime=python311'
       - '--source=./data_ingestion_py'
       - '--region=${_GCP_REGION}'
       - '--entry-point=data_ingestion_handler'
@@ -94,7 +94,7 @@ steps:
       - 'deploy'
       - 'tcost-model-py'
       - '--gen2'
-      - '--runtime=python39'
+      - '--runtime=python311'
       - '--source=./tcost_model_py'
       - '--region=${_GCP_REGION}'
       - '--entry-point=tcost_model_handler'

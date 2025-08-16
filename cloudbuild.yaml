@@ -14,7 +14,9 @@ steps:
       - 'build'
       - '-t'
       - '${_GCP_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REGISTRY_REPO}/alpha-model-py:$COMMIT_SHA'
-      - './alpha_model_py'
+      - '-f'
+      - 'alpha_model_py/Dockerfile'
+      - '.' # Use project root as build context
 
   # 2. Push the image to Google Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
@@ -44,7 +46,9 @@ steps:
       - 'build'
       - '-t'
       - '${_GCP_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REGISTRY_REPO}/risk-model-py:$COMMIT_SHA'
-      - './risk_model_py'
+      - '-f'
+      - 'risk_model_py/Dockerfile'
+      - '.' # Use project root as build context
 
   - name: 'gcr.io/cloud-builders/docker'
     id: 'push-risk-model'

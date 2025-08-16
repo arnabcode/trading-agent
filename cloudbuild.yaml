@@ -11,6 +11,7 @@ steps:
   # so they can be deployed as self-contained services.
   - name: 'ubuntu'
     id: 'prepare-function-source'
+    entrypoint: 'bash'
     args:
       - '-c'
       - |

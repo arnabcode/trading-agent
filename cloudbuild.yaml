@@ -1,0 +1,108 @@
+# Google Cloud Build pipeline for deploying the trading system services.
+# This file defines the steps to build and deploy the Cloud Run services
+# and Cloud Functions.
+#
+# To use this pipeline, create a Cloud Build trigger in your GCP project
+# that points to this file in your Git repository.
+
+steps:
+  # --- Alpha Model (Cloud Run Service) ---
+  # 1. Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-alpha-model'
+    args:
+      - 'build'
+      - '-t'
+      - '${_GCP_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REGISTRY_REPO}/alpha-model-py:$COMMIT_SHA'
+      - './alpha_model_py'
+
+  # 2. Push the image to Google Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-alpha-model'
+    args:
+      - 'push'
+      - '${_GCP_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REGISTRY_REPO}/alpha-model-py:$COMMIT_SHA'
+
+  # 3. Deploy the new image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-alpha-model'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'alpha-model-py'
+      - '--image=${_GCP_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REGISTRY_REPO}/alpha-model-py:$COMMIT_SHA'
+      - '--region=${_GCP_REGION}'
+      - '--platform=managed'
+      - '--allow-unauthenticated' # Required for Pub/Sub push subscriptions
+      - '--project=$PROJECT_ID'
+
+  # --- Risk Model (Cloud Run Service) ---
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-risk-model'
+    args:
+      - 'build'
+      - '-t'
+      - '${_GCP_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REGISTRY_REPO}/risk-model-py:$COMMIT_SHA'
+      - './risk_model_py'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-risk-model'
+    args:
+      - 'push'
+      - '${_GCP_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REGISTRY_REPO}/risk-model-py:$COMMIT_SHA'
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-risk-model'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'risk-model-py'
+      - '--image=${_GCP_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REGISTRY_REPO}/risk-model-py:$COMMIT_SHA'
+      - '--region=${_GCP_REGION}'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--project=$PROJECT_ID'
+
+  # --- Data Ingestion (Cloud Function Gen2) ---
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-data-ingestion'
+    entrypoint: gcloud
+    args:
+      - 'functions'
+      - 'deploy'
+      - 'data-ingestion-py'
+      - '--gen2'
+      - '--runtime=python39' # Matches the Dockerfile base image
+      - '--source=./data_ingestion_py'
+      - '--region=${_GCP_REGION}'
+      - '--entry-point=data_ingestion_handler'
+      - '--trigger-topic=market-data-scheduler' # Placeholder: User must create this Pub/Sub topic
+      - '--project=$PROJECT_ID'
+
+  # --- TCost Model (Cloud Function Gen2) ---
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-tcost-model'
+    entrypoint: gcloud
+    args:
+      - 'functions'
+      - 'deploy'
+      - 'tcost-model-py'
+      - '--gen2'
+      - '--runtime=python39'
+      - '--source=./tcost_model_py'
+      - '--region=${_GCP_REGION}'
+      - '--entry-point=tcost_model_handler'
+      - '--trigger-topic=tcost.request.v1' # This topic name should match the output of the risk-model
+      - '--project=$PROJECT_ID'
+
+# --- Configuration ---
+# These substitution variables can be set in the Cloud Build trigger configuration.
+substitutions:
+  _GCP_REGION: 'us-central1'
+  _ARTIFACT_REGISTRY_REPO: 'trading-system-repo' # User needs to create this Artifact Registry repo
+
+# Recommended options
+options:
+  logging: CLOUD_LOGGING_ONLY

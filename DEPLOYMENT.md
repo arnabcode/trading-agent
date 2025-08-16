@@ -69,15 +69,49 @@ gcloud artifacts repositories create trading-system-repo \
 
 ### d. Create Pub/Sub Topics
 
-The Cloud Functions are triggered by Pub/Sub topics. You need to create these topics manually first.
+Each service communicates with the next via a Pub/Sub topic. You must create these topics before deploying the services that subscribe to them.
 
 ```bash
-# The topic for the data ingestion scheduler
+# Topic for the data ingestion scheduler trigger
 gcloud pubsub topics create market-data-scheduler
 
-# The topic that the risk model's output triggers
+# Topic for the alpha model to subscribe to
+gcloud pubsub topics create alpha.request.v1
+
+# Topic for the risk model to subscribe to
+gcloud pubsub topics create risk.request.v1
+
+# Topic for the tcost model to subscribe to
 gcloud pubsub topics create tcost.request.v1
 ```
+
+### e. Create Pub/Sub Subscriptions for Cloud Run
+
+The Cloud Functions in our pipeline have their Pub/Sub triggers configured automatically by the `gcloud functions deploy` command. However, for the Cloud Run services (`alpha-model-py` and `risk-model-py`), you must manually create a **push subscription** to deliver messages from the topic to the service's unique URL.
+
+You must do this **after** the first successful deployment, as you need the service URL.
+
+1.  **Get the Service URL:** After your first pipeline run, go to the Cloud Run section of the console, find your service (e.g., `alpha-model-py`), and copy its URL. It will look like `https://[service-name]-[hash]-[region].a.run.app`.
+
+2.  **Create the Subscriptions:** Run the following commands, replacing `$ALPHA_MODEL_URL` and `$RISK_MODEL_URL` with the URLs you copied.
+
+    ```bash
+    # Replace with your service URLs and Project ID
+    export ALPHA_MODEL_URL="<YOUR_ALPHA_MODEL_URL_HERE>"
+    export RISK_MODEL_URL="<YOUR_RISK_MODEL_URL_HERE>"
+
+    # Subscription for the Alpha Model service
+    gcloud pubsub subscriptions create alpha-model-py-sub \
+        --topic=alpha.request.v1 \
+        --push-endpoint=${ALPHA_MODEL_URL} \
+        --push-auth-service-account=${CLOUDBUILD_SA} # Use the same SA for simplicity
+
+    # Subscription for the Risk Model service
+    gcloud pubsub subscriptions create risk-model-py-sub \
+        --topic=risk.request.v1 \
+        --push-endpoint=${RISK_MODEL_URL} \
+        --push-auth-service-account=${CLOUDBUILD_SA}
+    ```
 
 ## 2. CI/CD Setup: Creating the Cloud Build Trigger
 

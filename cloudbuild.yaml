@@ -6,6 +6,17 @@
 # that points to this file in your Git repository.
 
 steps:
+  # --- Preparation Step ---
+  # Copy the shared code into the directories of the Cloud Functions
+  # so they can be deployed as self-contained services.
+  - name: 'ubuntu'
+    id: 'prepare-function-source'
+    args:
+      - '-c'
+      - |
+        cp -r shared data_ingestion_py/
+        cp -r shared tcost_model_py/
+
   # --- Alpha Model (Cloud Run Service) ---
   # 1. Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
@@ -73,6 +84,7 @@ steps:
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'deploy-data-ingestion'
     entrypoint: gcloud
+    waitFor: ['prepare-function-source']
     args:
       - 'functions'
       - 'deploy'
@@ -89,6 +101,7 @@ steps:
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'deploy-tcost-model'
     entrypoint: gcloud
+    waitFor: ['prepare-function-source']
     args:
       - 'functions'
       - 'deploy'
